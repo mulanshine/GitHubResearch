@@ -1,0 +1,10 @@
+# path
+SpinalCord/Pytorch-UNet/INTERRUPTED.pth
+
+# model file
+*.pth
+
+# image file
+*.jpg
+*.pgm
+*.pmg
