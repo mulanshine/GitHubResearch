@@ -7,7 +7,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 from torch import optim
 from eval import eval_net
-from unet import UNet_GN5
+from unet import UNet_GN5,UNet_GN7,UNetTran_GN5,UNetTran_GN7
 from utils import get_ids, split_ids, split_train_val, get_imgs_and_masks, batch
 from dice_loss import DiceLoss, MulticlassDiceLoss
 from data.spinal_cord_crop_dataset import spinalcordRealCropDataSet,spinalcordGen100DataSet,spinalcordGenlblresize2padataSet
@@ -232,10 +232,10 @@ def get_args():
     parser.add_option("--spinal_root", default="/home/jjchu/Result/GANUNetResults/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200/test_latest/images/",type=str)
 
     # parser.add_option("--spinal_root", default="/home/jjchu/Result/GANUNetResults/cgan_80_64_site12_8aff2img_interval1_10L1_10PER3_1GAN_resnet_5blocks_batch8_step200/test_latest/images/",type=str)
-    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103_type2/log.txt",type=str)
-    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103_type2/",type=str)
-    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103_type2/",type=str)  
-    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103_type2/CP50.pth",help='load file model')
+    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_TranUNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_05103/log.txt",type=str)
+    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_TranUNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_05103/",type=str)
+    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/lblrescgan_TranUNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_05103/",type=str)  
+    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/lblrescgan_TranUNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_05103/CP50.pth",help='load file model')
     # parser.add_option("--train_list", default="./data/train_site12_list.txt", type=str)
     parser.add_option("--nlabel", default=True)
     parser.add_option("--n_class", default=3, type=int)
@@ -243,8 +243,7 @@ def get_args():
     parser.add_option("--real_or_fake", default="real_fake",type=str)
     parser.add_option("--num_workers", default=8, type=int)
     parser.add_option("--site", default=['site1','site2'])
-    parser.add_option("--weight", default=[1,10.0,3.0])
-    # parser.add_option("--weight", default=[0.5,10.0,3.0])
+    parser.add_option("--weight", default=[0.5,10.0,3.0])
     # parser.add_option("--resize_and_crop", default='center_crop',type=str,help="center_crop|resize_and_center_crop|resize_and_random_crop|resize")
     (options, args) = parser.parse_args()
     return options
@@ -254,7 +253,8 @@ if __name__ == '__main__':
     print(args.snapshots)
     print(args.spinal_root)
     print(args.weight)
-    net = UNet_GN5(n_channels=3, n_classes=3)
+    # net = UNet_GN5(n_channels=3, n_classes=3)
+    net = UNetTran_GN5(n_channels=3, n_classes=3)
     # print(net)
     if args.load != None and args.set == "test":
         net.load_state_dict(torch.load(args.load))

@@ -232,8 +232,8 @@ class spinalcordresGen8064DataSet(data.Dataset):
         self.root = root
         self.set = set
         self.imgdir = self.root 
-        self.maskdir = "/home/jjchu/DataSet/spinalcord/crop_8064/mask_crop/"
-        # self.maskdir = "/home/jjchu/DataSet/spinalcord/crop_100/mask_crop/"
+        # self.maskdir = "/home/jjchu/DataSet/spinalcord/crop_8064/mask_crop/"
+        self.maskdir = "/home/jjchu/DataSet/spinalcord/crop_100/mask_crop/"
         # self.maskdir = "/home/jjchu/DataSet/spinalcord/cropmask_rect/"
         self.site = site # ['site2','site4']
         self.real_or_fake = real_or_fake

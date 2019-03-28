@@ -7,7 +7,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 from torch import optim
 from eval import eval_net
-from unet import UNet_GN7
+from unet import UNet_GN5,UNet_GN7,UNetTran_GN5
 from utils import get_ids, split_ids, split_train_val, get_imgs_and_masks, batch
 from dice_loss import DiceLoss, MulticlassDiceLoss
 from data.spinal_cord_crop_dataset import spinalcordRealCropDataSet
@@ -53,7 +53,6 @@ def image_resize(pred,name):
         resize_size = (math.floor(w/1.16),math.floor(h/1.16))
     elif name.startswith('site3'):
         resize_size = (w,h)
-    
     pred = np.ceil(pred/2.0*255)
     pred = np.array(pred,dtype=np.uint8)
     pred = Image.fromarray(pred)
@@ -213,13 +212,11 @@ def get_args():
     parser.add_option('--beta2', default=0.999,type='float', help='learning rate')
     parser.add_option('-s', '--scale', dest='scale', type='float',default=0.5, help='downscaling factor of the images')
     parser.add_option("--img_size", default=(100,100)) #(128，128)‘
-# real_center200_site12_maxminnorm01_imgs_b12_25l_1103
-# real_center200_site12_meanstd_imgs_b12_25l_1103
     parser.add_option("--spinal_root", default="/home/jjchu/DataSet/spinalcord/", type=str)
-    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/Real_kernel7_center128_site12_meanstd_imgs_b8_25l_03103/log.txt",type=str)
-    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/Real_kernel7_center128_site12_meanstd_imgs_b8_25l_03103/",type=str)
-    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/Real_kernel7_center128_site12_meanstd_imgs_b8_25l_03103/",type=str)  
-    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/Real_kernel7_center128_site12_meanstd_imgs_b8_25l_03103/CP60.pth",help='load file model')
+    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/log.txt",type=str)
+    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/",type=str)
+    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/",type=str)  
+    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/CP60.pth",help='load file model')
     # parser.add_option("--train_list", default="./data/train_site12_list.txt", type=str)
     parser.add_option("--nlabel", default=True)
     parser.add_option("--n_class", default=3, type=int)
@@ -227,7 +224,7 @@ def get_args():
     parser.add_option("--num_workers", default=4, type=int)
     parser.add_option("--site", default=['site1','site2'])
     # parser.add_option("--weight", default=[1,20.0,6.0])
-    parser.add_option("--weight", default=[0.3,10.0,3.0])
+    parser.add_option("--weight", default=[0.5,10.0,3.0])
     # parser.add_option("--resize_and_crop", default='center_crop',type=str,help="center_crop|resize_and_center_crop|resize_and_random_crop|resize")
     (options, args) = parser.parse_args()
     return options
@@ -235,7 +232,9 @@ def get_args():
 if __name__ == '__main__':
     args = get_args()
     print(args.snapshots)
-    net = UNet_GN7(n_channels=3, n_classes=3)
+    
+    net = UNetTran_GN5(n_channels=3, n_classes=3)
+    # net = UNet_GN5(n_channels=3, n_classes=3)
     # print(net)
     if args.load != None and args.set == "test":
         net.load_state_dict(torch.load(args.load))

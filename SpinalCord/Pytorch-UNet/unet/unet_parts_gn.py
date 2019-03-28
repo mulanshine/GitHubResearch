@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class tranconv1(nn.Module):
     '''(conv => BN => ReLU) * 2'''
     def __init__(self, in_ch,num_groups=32):
@@ -11,16 +12,29 @@ class tranconv1(nn.Module):
         out_ch = int(in_ch/2)
         self.conv = nn.Sequential(
             nn.Conv2d(in_ch, out_ch, 1),
-            nn.GroupNorm(num_groups,out_ch),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, 1),
-            nn.GroupNorm(num_groups,out_ch),
-            nn.ReLU(inplace=True)
-        )
+            nn.Conv2d(in_ch, out_ch, 1))
 
     def forward(self, x): 
         x = self.conv(x)
         return x
+
+# class tranconv1(nn.Module):
+#     '''(conv => BN => ReLU) * 2'''
+#     def __init__(self, in_ch,num_groups=32):
+#         super(tranconv1, self).__init__()
+#         out_ch = int(in_ch/2)
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(in_ch, out_ch, 1),
+#             nn.GroupNorm(num_groups,out_ch),
+#             nn.ReLU(inplace=True),
+#             nn.Conv2d(out_ch, out_ch, 1),
+#             nn.GroupNorm(num_groups,out_ch),
+#             nn.ReLU(inplace=True)
+#         )
+
+#     def forward(self, x): 
+#         x = self.conv(x)
+#         return x
 
 
 # groupnorm
@@ -47,8 +61,8 @@ class double_inconv_GN(nn.Module):
     def __init__(self, in_ch, out_ch,num_groups=32):
         super(double_inconv_GN, self).__init__()
         self.conv = nn.Sequential(
-            # nn.ReflectionPad2d(3), 7,0
-            nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1),
+            nn.ReflectionPad2d(3),# 7,0
+            nn.Conv2d(in_ch, out_ch, kernel_size=7, padding=0),
             nn.GroupNorm(num_groups,out_ch),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_ch, out_ch, 3, padding=1),
