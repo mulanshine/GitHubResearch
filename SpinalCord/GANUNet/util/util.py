@@ -29,6 +29,7 @@ def tensor2im(input_image, imtype=np.uint8):
     if image_numpy.shape[0] == 1:
         image_numpy = np.tile(image_numpy, (3, 1, 1))
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+    image_numpy = np.around(image_numpy)
     return image_numpy.astype(imtype)
 
 

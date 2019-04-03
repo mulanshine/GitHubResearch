@@ -23,7 +23,7 @@ class BaseOptions():
         parser.add_argument('--netG', type=str, default='unet_128', help='selects model to use for netG')
         parser.add_argument('--n_layers_D', type=int, default=3, help='only used if netD==n_layers')
         parser.add_argument('--gpu_ids', type=str, default='1', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU') 
-        parser.add_argument('--name', type=str, default='lblrescgan_center100_site12_lbl2img_gansite3_10L1bg_10PER_1GAN_20GWMPER_unet128_batch8_step200', help='name of the experiment. It decides where to store samples and models')
+        parser.add_argument('--name', type=str, default='lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200', help='name of the experiment. It decides where to store samples and models')
         parser.add_argument('--dataset_mode', type=str, default='lblrescgan', help='chooses how datasets are loaded. [resizecgan|cgan|unaligned | aligned | single]')
         parser.add_argument('--model', type=str, default='lblcgan', help='chooses which model to use. cycle_gan, pix2pix, test')
         parser.add_argument('--imgdenoising', type=int, default=0, help='imgdenoising')

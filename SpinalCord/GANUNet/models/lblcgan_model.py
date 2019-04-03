@@ -12,7 +12,7 @@ class LblCGANModel(BaseModel):
     def modify_commandline_options(parser, is_train=True):
         # changing the default values to match the pix2pix paper
         # (https://phillipi.github.io/pix2pix/)
-        parser.set_defaults(norm='batch', netG='unet_128') #resnet_5blocks, resnet_3blocks_k3
+        parser.set_defaults(norm='batch', netG='resnet_5blocks') #resnet_5blocks, resnet_3blocks_k3
         parser.set_defaults(niter=100)
         parser.set_defaults(niter_decay=100)
         if is_train:

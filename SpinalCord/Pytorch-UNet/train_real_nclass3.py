@@ -10,7 +10,7 @@ from eval import eval_net
 from unet import UNet_GN5,UNet_GN7,UNetTran_GN5
 from utils import get_ids, split_ids, split_train_val, get_imgs_and_masks, batch
 from dice_loss import DiceLoss, MulticlassDiceLoss
-from data.spinal_cord_crop_dataset import spinalcordRealCropDataSet
+from data.spinal_cord_crop_dataset import spinalcordRealCropDataSet,spinalcordGen100DataSet,spinalcordresGen8064DataSet
 import scipy
 from PIL import Image
 import math
@@ -56,7 +56,7 @@ def image_resize(pred,name):
     pred = np.ceil(pred/2.0*255)
     pred = np.array(pred,dtype=np.uint8)
     pred = Image.fromarray(pred)
-    pred = pred.resize(resize_size)
+    pred = pred.resize(resize_size)#,Image.NEAREST
     pred = np.array(pred,dtype=np.uint8)
     pred = encode_segmap(pred)
     return pred
@@ -64,6 +64,7 @@ def image_resize(pred,name):
 
 def test_net_dice(args, net, batch_size=1, gpu=False,site=["site3","site3"]):
     net.eval()
+    # train_dataset = spinalcordGen100DataSet(args.spinal_root, img_size=args.img_size, site=site, batchsize=1, n_class=args.n_class,nlabel=args.nlabel,set=args.set,real_or_fake='real')
     train_dataset = spinalcordRealCropDataSet(args.spinal_root,img_size=args.img_size,site=site,batchsize=1, n_class=args.n_class, nlabel=args.nlabel,set=args.set)
     # train_dataset = spinalcordCenterCropDataSet(args.spinal_root,img_size=args.img_size,site=site,batchsize=1, n_class=args.n_class, nlabel=args.nlabel,set=args.set)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True, drop_last=True)
@@ -136,6 +137,7 @@ def train_net(args, net,epochs=5,batch_size=1,lr=0.1,val_percent=0.05,save_cp=Tr
         net.train()
 
         epoch_loss = 0 
+        # train_dataset = spinalcordGen100DataSet(args.spinal_root, img_size=args.img_size, site=args.site, batchsize=args.batchsize, n_class=args.n_class,nlabel=args.nlabel,set=args.set,real_or_fake=args.real_or_fake)
         train_dataset = spinalcordRealCropDataSet(args.spinal_root,img_size=args.img_size,site=args.site,batchsize=args.batchsize, n_class=args.n_class, nlabel=args.nlabel,set=args.set)
         # train_dataset = spinalcordCenterCropDataSet(args.spinal_root,img_size=args.img_size,site=args.site,batchsize=args.batchsize, n_class=args.n_class, nlabel=args.nlabel,set=args.set)
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batchsize, shuffle=True, num_workers=args.num_workers, pin_memory=True, drop_last=True)
@@ -184,13 +186,13 @@ def train_net(args, net,epochs=5,batch_size=1,lr=0.1,val_percent=0.05,save_cp=Tr
             dice = test_net_dice(args=args, net=net, batch_size=1, gpu=args.gpu,site=site)
             print(dice)
 
-        if (epoch+1)%10 == 0:
+        if (epoch+1)%5 == 0:
             site = ['site3','site3']
             print("######################## test site3 ###############################")
             dice = test_net_dice(args=args, net=net, batch_size=1, gpu=args.gpu,site=site)
             print(args.weight)
 
-        if (epoch+1)%10 == 0:
+        if (epoch+1)%5 == 0:
             site = ['site4','site4']
             print("######################## test site4 ###############################")
             dice = test_net_dice(args=args, net=net, batch_size=1, gpu=args.gpu,site=site)
@@ -205,26 +207,34 @@ def train_net(args, net,epochs=5,batch_size=1,lr=0.1,val_percent=0.05,save_cp=Tr
 def get_args():
     parser = OptionParser()
     parser.add_option('-e', '--epochs', dest='epochs', default=120, type='int',help='number of epochs')
-    parser.add_option('-b', '--batch-size', dest='batchsize', default=8,type='int', help='batch size')
+    parser.add_option('-b', '--batch-size', dest='batchsize', default=16,type='int', help='batch size')
     parser.add_option('-l', '--learning-rate', dest='lr', default=0.001,type='float', help='learning rate')
     parser.add_option('-g', '--gpu', action='store_true', dest='gpu',default=True, help='use cuda')
     parser.add_option('--beta1', default=0.99,type='float', help='learning rate')
     parser.add_option('--beta2', default=0.999,type='float', help='learning rate')
     parser.add_option('-s', '--scale', dest='scale', type='float',default=0.5, help='downscaling factor of the images')
     parser.add_option("--img_size", default=(100,100)) #(128，128)‘
+
+    # parser.add_option("--spinal_root", default="/home/jjchu/Result/GANUNetResults/lblrescgan_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200/test_latest/images/",type=str)
+    # # lblrescgan_TranUNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_05103
+    # parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_dropoutall_UNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103/log.txt",type=str)
+    # parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/lblrescgan_dropoutall_UNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103/",type=str)
+    # parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/lblrescgan_dropoutall_UNet5_kernel7_center100_site12_lbl2img_gansite3_10PER_1GAN_20GMPER_resnet_5blocks_batch8_step200_real_fake_b12_25l_1103/",type=str)  
+
     parser.add_option("--spinal_root", default="/home/jjchu/DataSet/spinalcord/", type=str)
-    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/log.txt",type=str)
-    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/",type=str)
-    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/",type=str)  
-    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/Real_TranUNet_kernel7_center100_site12_meanstd_imgs_b8_25l_05103/CP60.pth",help='load file model')
+    parser.add_option("--logfile", default="/home/jjchu/Result/UNetsnapshots/Real_dropoutall_UNet5_kernel7_center100_site12_meanstd_imgs_b8_25l_1103/log.txt",type=str)
+    parser.add_option("--snapshots", default="/home/jjchu/Result/UNetsnapshots/Real_dropoutall_UNet5_kernel7_center100_site12_meanstd_imgs_b8_25l_1103/",type=str)
+    parser.add_option("--savepath", default="/home/jjchu/Result/UNetResults/Real_dropoutall_UNet5_kernel7_center100_site12_meanstd_imgs_b8_25l_1103/",type=str)  
+    parser.add_option('-c', '--load', default="/home/jjchu/Result/UNetsnapshots/Real_dropoutall_UNet5_kernel7_center100_site12_meanstd_imgs_b8_25l_1103/CP60.pth",help='load file model')
+    # parser.add_option('-c', '--load', default=None,type=str)
     # parser.add_option("--train_list", default="./data/train_site12_list.txt", type=str)
     parser.add_option("--nlabel", default=True)
     parser.add_option("--n_class", default=3, type=int)
     parser.add_option("--set", default="train",type=str)
     parser.add_option("--num_workers", default=4, type=int)
     parser.add_option("--site", default=['site1','site2'])
-    # parser.add_option("--weight", default=[1,20.0,6.0])
-    parser.add_option("--weight", default=[0.5,10.0,3.0])
+    parser.add_option("--real_or_fake", default="real_fake",type=str)
+    parser.add_option("--weight", default=[1,10.0,3.0])
     # parser.add_option("--resize_and_crop", default='center_crop',type=str,help="center_crop|resize_and_center_crop|resize_and_random_crop|resize")
     (options, args) = parser.parse_args()
     return options
@@ -233,8 +243,8 @@ if __name__ == '__main__':
     args = get_args()
     print(args.snapshots)
     
-    net = UNetTran_GN5(n_channels=3, n_classes=3)
-    # net = UNet_GN5(n_channels=3, n_classes=3)
+    # net = UNetTran_GN5(n_channels=3, n_classes=3)
+    net = UNet_GN5(n_channels=3, n_classes=3)
     # print(net)
     if args.load != None and args.set == "test":
         net.load_state_dict(torch.load(args.load))

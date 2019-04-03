@@ -37,8 +37,8 @@ class LblResCGANDataset(BaseDataset):
         self.opt = opt
         self.root = opt.dataroot
         self.phase = opt.phase
-        self.imgdir = os.path.join(opt.dataroot,'crop_128/image_crop/')
-        self.maskdir = os.path.join(opt.dataroot,'crop_128/mask_crop/')
+        self.imgdir = os.path.join(opt.dataroot,'crop_100/image_crop/')
+        self.maskdir = os.path.join(opt.dataroot,'crop_100/mask_crop/')
         self.imgpaths = make_dataset(self.imgdir,opt.site)
         self.imgpaths = sorted(self.imgpaths)
         self.valid_classes = [0, 128, 255]
